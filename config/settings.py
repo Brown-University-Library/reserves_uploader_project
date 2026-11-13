@@ -10,8 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
-import json, logging, os, pprint
+import json
+import logging
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 log = logging.getLogger(__name__)
 
@@ -22,6 +26,22 @@ log = logging.getLogger(__name__)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+STUFF_DIR = BASE_DIR.parent
+
+## Preserve the old WSGI file-over-environment precedence; keep values literal.
+if os.environ.get('RSRVS_UPLDR__TESTING') != '1':
+    load_dotenv(STUFF_DIR / '.env', override=True, interpolate=False)
+
+
+def outer_path(variable: str) -> str:
+    """
+    Resolves relative filesystem settings from the outer directory.
+    Called by: config.settings module initialization.
+    """
+    path = Path(os.environ[variable])
+    if not path.is_absolute():
+        path = STUFF_DIR / path
+    return str(path)
 
 
 # Quick-start development settings - unsuitable for production
@@ -41,7 +61,7 @@ ALLOWED_HOSTS = json.loads( os.environ['RSRVS_UPLDR__ALLOWED_HOSTS_JSON'] )  # l
 SESSION_COOKIE_HTTPONLY = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_ENGINE = 'django.contrib.sessions.backends.file'
-SESSION_FILE_PATH = os.environ['RSRVS_UPLDR__SESSION_FILE_PATH']
+SESSION_FILE_PATH = outer_path('RSRVS_UPLDR__SESSION_FILE_PATH')
 
 # Application definition
 
@@ -145,7 +165,7 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = os.environ['RSRVS_UPLDR__STATIC_URL']
-STATIC_ROOT = os.environ['RSRVS_UPLDR__STATIC_ROOT']
+STATIC_ROOT = outer_path('RSRVS_UPLDR__STATIC_ROOT')
 
 
 # Email
@@ -178,7 +198,7 @@ LOGGING = {
         'logfile': {
             'level':'DEBUG',
             'class':'logging.FileHandler',  # note: configure server to use system's log-rotate to avoid permissions issues
-            'filename': os.environ['RSRVS_UPLDR__LOG_PATH'],
+            'filename': outer_path('RSRVS_UPLDR__LOG_PATH'),
             'formatter': 'standard',
         },
         'console':{
@@ -211,7 +231,7 @@ LOGGING = {
 ## app settings
 ## ------------------------------------------------------------------
 
-UPLOADS_DIR_PATH = os.environ['RSRVS_UPLDR__UPLOADS_DIR_PATH']
+UPLOADS_DIR_PATH = outer_path('RSRVS_UPLDR__UPLOADS_DIR_PATH')
 UPLOADS_DIR_URL_ROOT = os.environ['RSRVS_UPLDR__UPLOADS_DIR_URL_ROOT']
 
 PROHIBITED_CHARACTERS = [  # for uploaded-file's filename
