@@ -1,3 +1,0 @@
--r requirements_base.txt
-pip-tools==6.11.0
-PyMySQL==1.0.2
