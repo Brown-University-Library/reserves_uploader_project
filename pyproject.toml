@@ -28,9 +28,3 @@ dependencies = [
 local = []
 staging = ["mysqlclient==2.1.1"]
 prod = ["mysqlclient==2.1.1"]
-
-[tool.pyright]
-pythonVersion = "3.8"
-typeCheckingMode = "basic"
-venvPath = "."
-venv = ".venv"
